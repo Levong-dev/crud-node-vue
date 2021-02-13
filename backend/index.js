@@ -5,7 +5,7 @@ const bcrypt = require('bcrypt');
 
 // Vars
 const { PORT, URI, SALT } = require('./config');
-const { User } = require('./models');
+const { User, Note } = require('./models');
 
 // Middlewares
 app.use(express.json());
@@ -49,6 +49,58 @@ app.post('/login', async (req, res, next) => {
         if (!result) { return res.status(500).send({ message: "Some error" }); }
         return res.status(200).send({ message: "Logged in" })
     });
+})
+
+app.post('/create', async (req, res, next) => {
+    const { id, title, body } = req.body;
+
+    await Note.create({
+        author_id: id,
+        title: title,
+        body: body
+    }, (err, data) => {
+        if (err) { return res.status(500).send({ message: "Some error" }); }
+        return res
+            .status(200)
+            .send({
+                title: data.title,
+                body: data.body,
+                created_date: data.createdAt
+            })
+    })
+
+});
+
+app.delete('/delete/:id', async (req, res, next) => {
+    const { id } = req.params;
+
+    await Note.findByIdAndDelete(id, (err) => {
+        if (err) { return res.status(500).send({ message: "Some error" }); }
+        return res.status(200).send({ message: 'Deleted' })
+    })
+})
+
+app.put('/update/:id', async (req, res, next) => {
+    await Note.findByIdAndUpdate(req.params.id, {
+        title: req.body.title,
+        body: req.body.body
+    }, { new: true }, (err, data) => {
+        if (err) { return res.status(500).send({ message: "Some error" }); }
+        return res
+            .status(200)
+            .send({
+                title: data.title,
+                body: data.body,
+                created_date: data.createdAt
+            })
+    })
+})
+
+app.get('/notes/:id', async (req, res, next) => {
+    await Note.find({ author_id: req.params.id }, (err, data) => {
+        if (err) { return res.status(500).send({ message: "Some error" }); }
+        return res.status(200).send(data)
+    })
 })
 
 
