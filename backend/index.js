@@ -16,13 +16,13 @@ app.get('/ping', (req, res, next) => {
     return res.send('pong');
 })
 
-app.post('/register', async (req, res, next) => {
+app.post('/register', (req, res, next) => {
     const { name, email, password } = req.body;
 
     const match = await User.findOne({ email: email });
     if (match) { return res.status(406).send({ message: "Email already in use" }) }
 
-    const hash = await bcrypt.hash(password, SALT);
+    const hash = await bcrypt.hashSync(password, SALT);
 
     var new_user = new User({
         name: name,
@@ -45,7 +45,7 @@ app.post('/login', async (req, res, next) => {
     const match = await User.findOne({ email: email });
     if (!match) { return res.status(406).send({ message: "Some error" }); }
 
-    await bcrypt.compare(password, match.password).then(result => {
+    await bcrypt.compareSync(password, match.password).then(result => {
         if (!result) { return res.status(500).send({ message: "Some error" }); }
         return res.status(200).send({ message: "Logged in" })
     });
