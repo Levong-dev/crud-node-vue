@@ -32,7 +32,6 @@ var Note = new mongoose.Schema({
     }
 }, { timestamps: true });
 
-
 var user = mongoose.model('Users', User);
 var note = mongoose.model('Notes', Note);
 

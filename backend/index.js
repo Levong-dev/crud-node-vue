@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 // Vars
 const { PORT, URI, SALT } = require('./config');
@@ -16,7 +17,7 @@ app.get('/ping', (req, res, next) => {
     return res.send('pong');
 })
 
-app.post('/register', (req, res, next) => {
+app.post('/register', async (req, res, next) => {
     const { name, email, password } = req.body;
 
     const match = await User.findOne({ email: email });
@@ -45,9 +46,16 @@ app.post('/login', async (req, res, next) => {
     const match = await User.findOne({ email: email });
     if (!match) { return res.status(406).send({ message: "Some error" }); }
 
-    await bcrypt.compareSync(password, match.password).then(result => {
+    var token = await jwt.sign({ id: match._id }, 'secret', { expiresIn: '1h' });
+
+    await bcrypt.compare(password, match.password).then(result => {
         if (!result) { return res.status(500).send({ message: "Some error" }); }
-        return res.status(200).send({ message: "Logged in" })
+        return res
+            .status(200)
+            .json({ 
+                message: "Logged in",
+                token: token
+            });
     });
 })
 
@@ -102,7 +110,6 @@ app.get('/notes/:id', async (req, res, next) => {
         return res.status(200).send(data)
     })
 })
-
 
 // Server Start
 mongoose.connect(URI, {

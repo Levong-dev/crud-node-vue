@@ -8,7 +8,7 @@
         class="sign-up-input"
         autocomplete="off"
       />
-      <br>
+      <br />
       <input
         type="email"
         placeholder="email"
@@ -23,8 +23,12 @@
         autocomplete="off"
       />
       <div class="send-container">
-        <input type="button" value="Submit" class="send-button rounded">
-      </div> 
+        <input type="button" value="Submit" class="send-button rounded" />
+      </div>
+      <br />
+      <div>
+        <p>Already have an account? <router-link to="/">Sign In!</router-link></p>
+      </div>
     </div>
   </div>
 </template>
@@ -66,13 +70,13 @@ export default {
   border-bottom: 2px solid rgba(0, 0, 0, 0.781);
 }
 
-.send-container{
+.send-container {
   margin: auto;
   margin-top: 25px;
   width: 50%;
 }
 
-.send-button{
+.send-button {
   width: 50%;
   padding: 5px 25px;
   text-transform: uppercase;
@@ -82,10 +86,9 @@ export default {
   transition: all 0.3s;
 }
 
-.send-button:hover{
+.send-button:hover {
   font-weight: bold;
   background-color: rgba(0, 0, 0, 0.781);
   color: white;
 }
-
 </style>

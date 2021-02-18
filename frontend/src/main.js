@@ -6,6 +6,7 @@ import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
 // Components
 import Login from './components/Login.vue';
 import Register from './components/Register.vue';
+import Dashboard from './components/Dashboard.vue';
 
 // Import Bootstrap an BootstrapVue CSS files (order is important)
 import 'bootstrap/dist/css/bootstrap.css'
@@ -25,13 +26,51 @@ const router = new VueRouter({
   routes: [
     {
       path: '/',
-      component: Login
+      component: Login,
+      name: 'login',
+      meta: {
+        guest: true,
+      }
     },
     {
       path: '/signup',
-      component: Register
+      name: 'signup',
+      component: Register,
+      meta: {
+        guest: true
+      }
+    },
+    {
+      path: '/dashboard',
+      component: Dashboard,
+      name: 'dashboard',
+      meta: {
+        requiresAuth: true
+      }
     }
   ]
+})
+
+router.beforeEach((to, from, next) => {
+  if (to.matched.some(record => record.meta.requiresAuth)) {
+    if (localStorage.getItem('jwt') == null) {
+      next({ path: '/' });
+    } else{
+      next();
+    }
+  }
+
+  else if (to.matched.some(record => record.meta.guest)) {
+    if (localStorage.getItem('jwt') != null) {
+      next({ path: '/dashboard'});
+    } else {
+      next()
+    }
+  }
+
+  else{
+    next();
+  }
 })
 
 new Vue({
