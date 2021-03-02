@@ -2,11 +2,21 @@ import Vue from 'vue'
 import App from './App.vue'
 import VueRouter from 'vue-router'
 import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { faUser, faSignOutAlt } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+
+// Font Awesome
+library.add(faUser, faSignOutAlt)
+Vue.component('font-awesome-icon', FontAwesomeIcon)
 
 // Components
 import Login from './components/Login.vue';
 import Register from './components/Register.vue';
 import Dashboard from './components/Dashboard.vue';
+
+// Store
+import store from './store'
 
 // Import Bootstrap an BootstrapVue CSS files (order is important)
 import 'bootstrap/dist/css/bootstrap.css'
@@ -51,29 +61,48 @@ const router = new VueRouter({
   ]
 })
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   if (to.matched.some(record => record.meta.requiresAuth)) {
-    if (localStorage.getItem('jwt') == null) {
+    if (localStorage.getItem('token') == null) {
       next({ path: '/' });
     } else{
-      next();
+      fetch("http://localhost:3000/verifyToken", {
+        headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+      }).then(data => {
+
+        console.log(data.status)
+
+        if(data.status != 200){
+          localStorage.clear('token');
+          return next({ path: '/' })
+        }
+
+        return next();
+      })
     }
   }
-
   else if (to.matched.some(record => record.meta.guest)) {
-    if (localStorage.getItem('jwt') != null) {
-      next({ path: '/dashboard'});
+    if (localStorage.getItem('token') != null) {
+      fetch("http://localhost:3000/verifyToken", {
+        headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+      }).then(data => {
+        if(data.status != 200){
+          return next()
+        }
+
+        return next({ path: '/dashboard'});
+      })
     } else {
       next()
     }
   }
-
   else{
     next();
   }
 })
 
 new Vue({
+  store,
   render: h => h(App),
   router
 }).$mount('#app')

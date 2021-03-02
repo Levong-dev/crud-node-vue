@@ -3,6 +3,7 @@ const app = express();
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const cors = require('cors');
 
 // Vars
 const { PORT, URI, SALT } = require('./config');
@@ -11,10 +12,31 @@ const { User, Note } = require('./models');
 // Middlewares
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cors());
 
 // Routes
 app.get('/ping', (req, res, next) => {
     return res.send('pong');
+})
+
+app.get('/verifyToken', async (req, res, next) => {
+    const token = req.headers.authorization.split(' ')[1];
+    console.log(token)
+    await jwt.verify(token, 'secret', (err, decoded) => {
+        if (err){
+            return res
+                .status(500)
+                .send({ message: 'Server error'})
+        }
+
+        if (Date.now() >= decoded.exp * 1000){
+            return res
+                .status(406)
+                .send({ message: 'Token expired' })
+        }
+
+        return res.sendStatus(200)
+    })
 })
 
 app.post('/register', async (req, res, next) => {
@@ -52,8 +74,8 @@ app.post('/login', async (req, res, next) => {
         if (!result) { return res.status(500).send({ message: "Some error" }); }
         return res
             .status(200)
-            .json({ 
-                message: "Logged in",
+            .json({
+                username: match.name,
                 token: token
             });
     });

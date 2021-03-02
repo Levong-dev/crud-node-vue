@@ -3,7 +3,7 @@
     <router-view></router-view>
   </div>
 </template>
-
+<script src="https://kit.fontawesome.com/8fd4683522.js" crossorigin="anonymous"></script>
 <script>
 export default {
   name: 'App'
@@ -12,7 +12,7 @@ export default {
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@500&display=swap');
-
+@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@300&display=swap');
 body{
   background: #D1913C;  /* fallback for old browsers */
   background: -webkit-linear-gradient(to right, #FFD194, #D1913C);  /* Chrome 10-25, Safari 5.1-6 */

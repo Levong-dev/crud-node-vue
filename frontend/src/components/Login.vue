@@ -3,6 +3,7 @@
     <div class="sign-in-title rounded-top"><h2>Sign In</h2></div>
     <div class="form-container">
       <input
+        v-model="email"
         type="email"
         placeholder="email"
         class="sign-in-input"
@@ -10,15 +11,21 @@
       />
       <br />
       <input
+        v-model="password"
         type="password"
         placeholder="password"
         class="sign-in-input"
         autocomplete="off"
       />
       <div class="send-container">
-        <input type="button" value="Submit" class="send-button rounded" />
+        <input 
+          type="button" 
+          value="Submit" 
+          class="send-button rounded" 
+          v-on:click=login()
+        />
       </div>
-      <br/>
+      <br />
       <div>
         <p>No account? <router-link to="/signup">Create One!</router-link></p>
       </div>
@@ -29,6 +36,38 @@
 <script>
 export default {
   name: "Login",
+  data: () => {
+    return {
+      email: "",
+      password: "",
+    };
+  },
+  methods: {
+    async login() {
+      this.$store.dispatch('login', this.$data)
+      .then(() => {
+        this.$router.push('/dashboard')
+      })
+      .catch((err) => {
+        alert(err);
+      })
+      /*const response = await fetch("http://localhost:3000/login", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email: this.$data.email,
+          password: this.$data.password
+        })
+      })
+
+      const { user, token } = await response.json();
+      this.setUser(user);
+      this.setToken(token);
+      this.$router.push("/dashboard");*/
+    },
+  },
 };
 </script>
 
