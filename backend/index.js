@@ -9,6 +9,9 @@ const cors = require('cors');
 const { PORT, URI, SALT } = require('./config');
 const { User, Note } = require('./models');
 
+// CheckToken function
+const checkToken = require('./checkToken')
+
 // Middlewares
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -23,13 +26,13 @@ app.get('/verifyToken', async (req, res, next) => {
     const token = req.headers.authorization.split(' ')[1];
     console.log(token)
     await jwt.verify(token, 'secret', (err, decoded) => {
-        if (err){
+        if (err) {
             return res
                 .status(500)
-                .send({ message: 'Server error'})
+                .send({ message: 'Server error' })
         }
 
-        if (Date.now() >= decoded.exp * 1000){
+        if (Date.now() >= decoded.exp * 1000) {
             return res
                 .status(406)
                 .send({ message: 'Token expired' })
@@ -81,11 +84,13 @@ app.post('/login', async (req, res, next) => {
     });
 })
 
+app.use(checkToken);
+
 app.post('/create', async (req, res, next) => {
-    const { id, title, body } = req.body;
+    const {title, body } = req.body;
     console.log(req.body)
     await Note.create({
-        author_id: id,
+        author_id: req.id,
         title: title,
         body: body
     }, (err, data) => {
@@ -100,6 +105,7 @@ app.post('/create', async (req, res, next) => {
     })
 
 });
+
 
 app.delete('/delete/:id', async (req, res, next) => {
     const { id } = req.params;
@@ -126,8 +132,8 @@ app.put('/update/:id', async (req, res, next) => {
     })
 })
 
-app.get('/notes/:id', async (req, res, next) => {
-    await Note.find({ author_id: req.params.id }, (err, data) => {
+app.get('/notes', async (req, res, next) => {
+    await Note.find({ author_id: req.id }, (err, data) => {
         if (err) { return res.status(500).send({ message: "Some error" }); }
         return res.status(200).send(data)
     })

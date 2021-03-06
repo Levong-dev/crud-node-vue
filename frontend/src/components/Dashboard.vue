@@ -144,15 +144,17 @@ export default {
       this.$router.push("/");
     },
     async fetchAllData() {
-      await fetch("http://localhost:3000/notes/", {
+      const response = await fetch("http://localhost:3000/notes/", {
+        method: 'GET',
         headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
       })
-      /*
-        .then((res) => res.json())
-        .then((data) => {
-          this.notes = data;
-        });
-      */
+
+      if(response.status == 500){
+        return this.logout()
+      }
+
+      var data = await response.json()
+      this.notes = data;
     },
     async addNote() {
       const response = await fetch("http://localhost:3000/create", {
@@ -160,6 +162,7 @@ export default {
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json",
+          'Authorization': 'Bearer ' + localStorage.getItem('token')
         },
         body: JSON.stringify({
           id: "",
@@ -167,15 +170,24 @@ export default {
           body: this.body,
         }),
       });
-      console.log(await response.json());
+
+      if(response.status == 500){
+        return this.logout()
+      }
+
       this.fetchAllData();
       this.show = true;
     },
     async deleteNote(itemID) {
       const response = await fetch(`http://localhost:3000/delete/${itemID}`, {
         method: "DELETE",
+        headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
       });
-      console.log(await response.json());
+      
+      if(response.status == 500){
+        return this.logout()
+      }
+
       this.fetchAllData();
     },
     async updateNote() {
@@ -184,13 +196,18 @@ export default {
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json",
+          'Authorization': 'Bearer ' + localStorage.getItem('token')
         },
         body: JSON.stringify({
           title: this.title,
           body: this.body,
         }),
       });
-      console.log(await response.json());
+      
+      if(response.status == 500){
+        return this.logout()
+      }
+      
       this.fetchAllData();
       this.show_update = true;
     },
