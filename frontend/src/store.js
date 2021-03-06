@@ -13,6 +13,10 @@ export default new Vuex.Store({
         token: localStorage.getItem('token') || null
     },
     actions: {
+        showN({ commit }, settings) {
+            const { message, status } = settings;
+            commit('showNotification', { message, status })
+        },
         async login({ commit }, user) {
             const response = await fetch("http://localhost:3000/login", {
                 method: 'POST',
@@ -43,6 +47,17 @@ export default new Vuex.Store({
         }
     },
     mutations: {
+        showNotification(state, { message, status }) {
+            // console.log(settings)
+            Vue.$toast.open({
+                message: message,
+                type: status,
+                position: 'top',
+                queue: true,
+                duration: 1000
+                // all of other options may go here
+            });
+        },
         setUser(state, { username, token }) {
             state.token = token;
             state.user = username;

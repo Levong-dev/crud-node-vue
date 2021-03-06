@@ -46,26 +46,18 @@ export default {
     async login() {
       this.$store.dispatch('login', this.$data)
       .then(() => {
+        this.$store.dispatch('showN', {
+          message: 'Welcome',
+          status: 'success'
+        })
         this.$router.push('/dashboard')
       })
-      .catch((err) => {
-        alert(err);
-      })
-      /*const response = await fetch("http://localhost:3000/login", {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          email: this.$data.email,
-          password: this.$data.password
+      .catch(() => {
+        this.$store.dispatch('showN', {
+          message: 'Error',
+          status: 'error'
         })
       })
-
-      const { user, token } = await response.json();
-      this.setUser(user);
-      this.setToken(token);
-      this.$router.push("/dashboard");*/
     },
   },
 };

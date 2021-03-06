@@ -5,10 +5,17 @@ import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { faUser, faSignOutAlt, faPlusCircle, faPaperPlane, faTrash, faPen, faSyncAlt } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import 'vue-toast-notification/dist/theme-sugar.css';
+import VueToast from 'vue-toast-notification';
+
+
 
 // Font Awesome
 library.add(faUser, faSignOutAlt, faPlusCircle, faPaperPlane, faTrash, faPen, faSyncAlt)
 Vue.component('font-awesome-icon', FontAwesomeIcon)
+
+// Notification
+Vue.use(VueToast);
 
 // Components
 import Login from './components/Login.vue';

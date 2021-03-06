@@ -5,9 +5,11 @@
 </template>
 <script src="https://kit.fontawesome.com/8fd4683522.js" crossorigin="anonymous"></script>
 <script>
+
 export default {
-  name: 'App'
+  name: 'App',
 }
+
 </script>
 
 <style>
