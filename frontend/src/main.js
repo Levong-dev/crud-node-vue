@@ -3,11 +3,11 @@ import App from './App.vue'
 import VueRouter from 'vue-router'
 import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { faUser, faSignOutAlt } from '@fortawesome/free-solid-svg-icons'
+import { faUser, faSignOutAlt, faPlusCircle, faPaperPlane } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 // Font Awesome
-library.add(faUser, faSignOutAlt)
+library.add(faUser, faSignOutAlt, faPlusCircle, faPaperPlane)
 Vue.component('font-awesome-icon', FontAwesomeIcon)
 
 // Components
