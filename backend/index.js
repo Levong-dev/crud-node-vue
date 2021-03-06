@@ -83,7 +83,7 @@ app.post('/login', async (req, res, next) => {
 
 app.post('/create', async (req, res, next) => {
     const { id, title, body } = req.body;
-
+    console.log(req.body)
     await Note.create({
         author_id: id,
         title: title,

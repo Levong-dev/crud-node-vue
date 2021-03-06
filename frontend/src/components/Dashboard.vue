@@ -12,10 +12,10 @@
             <hr />
           </div>
           <div class="my-modal-body">
-            <input 
-              class="create-title" 
-              type="text" 
-              placeholder="Title" 
+            <input
+              class="create-title"
+              type="text"
+              placeholder="Title"
               v-model="title"
             />
             <br />
@@ -27,9 +27,45 @@
             />
           </div>
           <button
-            class="button-send-task rounded-pill shadow-sm" v-on:click="addNote()"
+            class="button-send-task rounded-pill shadow-sm"
+            v-on:click="addNote()"
           >
             Send&nbsp;<font-awesome-icon icon="paper-plane" />
+          </button>
+        </div>
+      </div>
+      <div id="my-modal" class="my-modal" v-if="!show_update">
+        <div class="modal-content">
+          <div>
+            <span class="close" v-on:click="show_update = !show_update"
+              >&times;</span
+            >
+          </div>
+          <div class="my-modal-header">
+            <h3>Update the note</h3>
+            <br />
+            <hr />
+          </div>
+          <div class="my-modal-body">
+            <input
+              class="create-title"
+              type="text"
+              placeholder="Title"
+              v-model="title"
+            />
+            <br />
+            <input
+              class="create-description"
+              type="text"
+              placeholder="Short description"
+              v-model="body"
+            />
+          </div>
+          <button
+            class="button-send-task rounded-pill shadow-sm"
+            v-on:click="updateNote()"
+          >
+            Update&nbsp;<font-awesome-icon icon="sync-alt" />
           </button>
         </div>
       </div>
@@ -44,21 +80,35 @@
       </h3>
     </div>
     <hr class="header-hr" style="clear: both" />
-    <div class="notes" style="clear: both">
-      <div
-        class="card rounded"
-        style="width: 13rem"
-        v-for="note in notes"
-        :key="note._id"
-      >
-        <div class="card-header">{{ note.title }}</div>
-        <hr class="note-hr" />
-        <div class="card-body">{{ note.body }}</div>
+    <div class="cards-container">
+      <div class="notes" style="clear: both">
+        <div
+          class="card rounded"
+          style="width: 13rem"
+          v-for="note in notes"
+          :key="note._id"
+        >
+          <div id="action-buttons">
+            <span
+              class="pen-icon rounded-pill"
+              v-on:click="openUpdateModal(note)"
+              ><font-awesome-icon icon="pen"
+            /></span>
+            <span
+              class="trash-icon rounded-pill"
+              v-on:click="deleteNote(note._id)"
+              ><font-awesome-icon icon="trash"
+            /></span>
+          </div>
+          <div class="card-header">{{ note.title }}</div>
+          <hr class="note-hr" />
+          <div class="card-body">{{ note.body }}</div>
+        </div>
       </div>
     </div>
     <div>
       <button
-        v-on:click="show = !show"
+        v-on:click="show = false"
         class="button-task rounded-pill shadow-sm"
       >
         Add Note&nbsp;<font-awesome-icon icon="plus-circle" />
@@ -77,9 +127,11 @@ export default {
   data() {
     return {
       notes: [],
-      show: false,
-      title: '',
-      body: ''
+      show: true,
+      show_update: true,
+      title: "",
+      body: "",
+      id: "",
     };
   },
   created() {
@@ -92,14 +144,61 @@ export default {
       this.$router.push("/");
     },
     async fetchAllData() {
-      await fetch("http://localhost:3000/notes/603e951b21dc9e66ebb15eee")
+      await fetch("http://localhost:3000/notes/", {
+        headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+      })
+      /*
         .then((res) => res.json())
         .then((data) => {
           this.notes = data;
         });
+      */
     },
-    async addNote(){
-      await fetch("http://localhost:3000/notes/603e951b21dc9e66ebb15eee")
+    async addNote() {
+      const response = await fetch("http://localhost:3000/create", {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: "",
+          title: this.title,
+          body: this.body,
+        }),
+      });
+      console.log(await response.json());
+      this.fetchAllData();
+      this.show = true;
+    },
+    async deleteNote(itemID) {
+      const response = await fetch(`http://localhost:3000/delete/${itemID}`, {
+        method: "DELETE",
+      });
+      console.log(await response.json());
+      this.fetchAllData();
+    },
+    async updateNote() {
+      const response = await fetch(`http://localhost:3000/update/${this.id}`, {
+        method: "PUT",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title: this.title,
+          body: this.body,
+        }),
+      });
+      console.log(await response.json());
+      this.fetchAllData();
+      this.show_update = true;
+    },
+    openUpdateModal(note){
+      this.title = note.title;
+      this.body = note.body;
+      this.id = note._id;
+      this.show_update = false;
     },
     openModal() {
       var modal = document.getElementById("my-modal");
@@ -112,6 +211,55 @@ export default {
 * {
   font-family: "Raleway", sans-serif !important;
 }
+
+.pen-icon,
+.trash-icon {
+  transition: ease 0.1s;
+  cursor: pointer;
+  padding: 5px 7px;
+  margin-right: 10px;
+  background-color: #face90;
+}
+
+.trash-icon {
+  background-color: rgb(226, 104, 104);
+  color: white;
+}
+
+.pen-icon:hover {
+  background-color: rgb(250, 206, 144, 0.5);
+}
+
+.trash-icon:hover {
+  background-color: rgba(226, 104, 104, 0.5);
+}
+
+#action-buttons {
+  position: absolute;
+  left: 75%;
+  top: 8px;
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+  cursor: pointer;
+}
+
+::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 6px rgba(200, 200, 200, 1);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  background-color: #fff;
+  -webkit-box-shadow: inset 0 0 6px rgba(90, 90, 90, 0.7);
+}
+.notes {
+  overflow: auto;
+  height: 450px;
+}
+
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.5s;
@@ -220,6 +368,7 @@ button {
 
 .card {
   font-family: "Raleway", sans-serif;
+  position: relative;
   width: 25% !important;
   margin-left: 5%;
   margin-top: 10px;
@@ -249,7 +398,7 @@ button {
   text-align: center;
   margin: auto;
 }
-
+/*
 .card:hover {
   -ms-transform: scale(1.02);
   -webkit-transform: scale(1.02);
@@ -257,8 +406,10 @@ button {
   -o-transform: scale(1.02);
   transform: scale(1.02);
 }
+*/
 
-.button-task:hover, .button-send-task:hover {
+.button-task:hover,
+.button-send-task:hover {
   background-color: #face9056;
 }
 
@@ -281,7 +432,7 @@ button {
   clear: both;
 }
 
-.button-send-task{
+.button-send-task {
   font-weight: bolder;
   width: 25%;
   margin: auto;
