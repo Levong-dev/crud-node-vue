@@ -81,28 +81,31 @@
     </div>
     <hr class="header-hr" style="clear: both" />
     <div class="cards-container">
-      <div class="notes" style="clear: both">
-        <div
-          class="card rounded"
-          style="width: 13rem"
-          v-for="note in notes"
-          :key="note._id"
-        >
-          <div id="action-buttons">
-            <span
-              class="pen-icon rounded-pill"
-              v-on:click="openUpdateModal(note)"
-              ><font-awesome-icon icon="pen"
-            /></span>
-            <span
-              class="trash-icon rounded-pill"
-              v-on:click="deleteNote(note._id)"
-              ><font-awesome-icon icon="trash"
-            /></span>
+      <font-awesome-icon icon="spinner" size="3x" spin id="loader" />
+      <div id="hidden-container">
+        <div class="notes" style="clear: both">
+          <div
+            class="card rounded"
+            style="width: 13rem"
+            v-for="note in notes"
+            :key="note._id"
+          >
+            <div id="action-buttons">
+              <span
+                class="pen-icon rounded-pill"
+                v-on:click="openUpdateModal(note)"
+                ><font-awesome-icon icon="pen"
+              /></span>
+              <span
+                class="trash-icon rounded-pill"
+                v-on:click="deleteNote(note._id)"
+                ><font-awesome-icon icon="trash"
+              /></span>
+            </div>
+            <div class="card-header">{{ note.title }}</div>
+            <hr class="note-hr" />
+            <div class="card-body">{{ note.body }}</div>
           </div>
-          <div class="card-header">{{ note.title }}</div>
-          <hr class="note-hr" />
-          <div class="card-body">{{ note.body }}</div>
         </div>
       </div>
     </div>
@@ -120,8 +123,6 @@
 </template>
 
 <script>
-// import axios from "axios";
-
 export default {
   name: "Dashboard",
   data() {
@@ -141,28 +142,38 @@ export default {
     async logout() {
       localStorage.clear("token");
       this.$store.dispatch("logout");
+      this.$store.dispatch("showN", {
+        message: "Logged out!",
+        status: "default",
+      });
       this.$router.push("/");
     },
     async fetchAllData() {
       const response = await fetch("http://localhost:3000/notes/", {
-        method: 'GET',
-        headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
-      })
+        method: "GET",
+        headers: { Authorization: "Bearer " + localStorage.getItem("token") },
+      });
 
-      if(response.status == 500){
-        return this.logout()
+      if (response.status == 500) {
+        return this.logout();
       }
 
-      var data = await response.json()
-      this.notes = data;
+      var data = await response.json();
+      this.notes = data.reverse();
+      this.title = "";
+      this.body = "";
+      this.id = "";
     },
     async addNote() {
+      if (this.checkEmptyFields()) {
+        return;
+      }
       const response = await fetch("http://localhost:3000/create", {
         method: "POST",
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json",
-          'Authorization': 'Bearer ' + localStorage.getItem('token')
+          Authorization: "Bearer " + localStorage.getItem("token"),
         },
         body: JSON.stringify({
           id: "",
@@ -171,9 +182,14 @@ export default {
         }),
       });
 
-      if(response.status == 500){
-        return this.logout()
+      if (response.status == 500) {
+        return this.logout();
       }
+
+      this.$store.dispatch("showN", {
+        message: "Note created!",
+        status: "success",
+      });
 
       this.fetchAllData();
       this.show = true;
@@ -181,37 +197,50 @@ export default {
     async deleteNote(itemID) {
       const response = await fetch(`http://localhost:3000/delete/${itemID}`, {
         method: "DELETE",
-        headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+        headers: { Authorization: "Bearer " + localStorage.getItem("token") },
       });
-      
-      if(response.status == 500){
-        return this.logout()
+
+      if (response.status == 500) {
+        return this.logout();
       }
+
+      this.$store.dispatch("showN", {
+        message: "The note has been deleted!",
+        status: "info",
+      });
 
       this.fetchAllData();
     },
     async updateNote() {
+      if (this.checkEmptyFields()) {
+        return;
+      }
       const response = await fetch(`http://localhost:3000/update/${this.id}`, {
         method: "PUT",
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json",
-          'Authorization': 'Bearer ' + localStorage.getItem('token')
+          Authorization: "Bearer " + localStorage.getItem("token"),
         },
         body: JSON.stringify({
           title: this.title,
           body: this.body,
         }),
       });
-      
-      if(response.status == 500){
-        return this.logout()
+
+      if (response.status == 500) {
+        return this.logout();
       }
-      
+
+      this.$store.dispatch("showN", {
+        message: "Note updated!",
+        status: "success",
+      });
+
       this.fetchAllData();
       this.show_update = true;
     },
-    openUpdateModal(note){
+    openUpdateModal(note) {
       this.title = note.title;
       this.body = note.body;
       this.id = note._id;
@@ -221,6 +250,17 @@ export default {
       var modal = document.getElementById("my-modal");
       modal.style.display = "block";
     },
+    checkEmptyFields() {
+      if (this.title.length == 0 || this.body.length == 0) {
+        this.$store.dispatch("showN", {
+          message: "Empty fields",
+          status: "error",
+        });
+        return true;
+      }
+
+      return false;
+    },
   },
 };
 </script>
@@ -228,7 +268,10 @@ export default {
 * {
   font-family: "Raleway", sans-serif !important;
 }
-
+#loader {
+  margin: 15% auto;
+  display: none;
+}
 .pen-icon,
 .trash-icon {
   transition: ease 0.1s;

@@ -2,32 +2,35 @@
   <div class="sign-in-form rounded shadow">
     <div class="sign-in-title rounded-top"><h2>Sign In</h2></div>
     <div class="form-container">
-      <input
-        v-model="email"
-        type="email"
-        placeholder="email"
-        class="sign-in-input"
-        autocomplete="off"
-      />
-      <br />
-      <input
-        v-model="password"
-        type="password"
-        placeholder="password"
-        class="sign-in-input"
-        autocomplete="off"
-      />
-      <div class="send-container">
-        <input 
-          type="button" 
-          value="Submit" 
-          class="send-button rounded" 
-          v-on:click=login()
+      <font-awesome-icon icon="circle-notch" size="3x" spin id="loader" />
+      <div id="hidden-form">
+        <input
+          v-model="email"
+          type="email"
+          placeholder="email"
+          class="sign-in-input"
+          autocomplete="off"
         />
-      </div>
-      <br />
-      <div>
-        <p>No account? <router-link to="/signup">Create One!</router-link></p>
+        <br />
+        <input
+          v-model="password"
+          type="password"
+          placeholder="password"
+          class="sign-in-input"
+          autocomplete="off"
+        />
+        <div class="send-container">
+          <input
+            type="button"
+            value="Submit"
+            class="send-button rounded"
+            v-on:click="login()"
+          />
+        </div>
+        <br />
+        <div>
+          <p>No account? <router-link to="/signup">Create One!</router-link></p>
+        </div>
       </div>
     </div>
   </div>
@@ -44,20 +47,27 @@ export default {
   },
   methods: {
     async login() {
-      this.$store.dispatch('login', this.$data)
-      .then(() => {
-        this.$store.dispatch('showN', {
-          message: 'Welcome',
-          status: 'success'
+      var hf = document.getElementById('hidden-form');
+      var sp = document.getElementById('loader');
+      hf.style.display = "none";
+      sp.style.display = "block"
+      this.$store
+        .dispatch("login", this.$data)
+        .then(() => {
+          this.$store.dispatch("showN", {
+            message: "Welcome",
+            status: "success",
+          });
+          this.$router.push("/dashboard");
         })
-        this.$router.push('/dashboard')
-      })
-      .catch(() => {
-        this.$store.dispatch('showN', {
-          message: 'Error',
-          status: 'error'
-        })
-      })
+        .catch(() => {
+          hf.style.display = "block";
+          sp.style.display = "none";
+          this.$store.dispatch("showN", {
+            message: "Email or password are invalids",
+            status: "error",
+          });
+        });
     },
   },
 };
@@ -65,8 +75,14 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+
+#loader{
+  display: none;
+}
+
 .form-container {
   padding: 50px;
+  height: 350px;
 }
 
 .sign-in-form {

@@ -1,33 +1,43 @@
 <template>
   <div class="sign-up-form rounded shadow">
     <div class="sign-up-title rounded-top"><h2>Sign Up</h2></div>
+    <font-awesome-icon icon="circle-notch" size="3x" spin id="loader" />
     <div class="form-container">
-      <input
-        type="text"
-        placeholder="name"
-        class="sign-up-input"
-        autocomplete="off"
-      />
-      <br />
-      <input
-        type="email"
-        placeholder="email"
-        class="sign-up-input"
-        autocomplete="off"
-      />
-      <br />
-      <input
-        type="password"
-        placeholder="password"
-        class="sign-up-input"
-        autocomplete="off"
-      />
-      <div class="send-container">
-        <input type="button" value="Submit" class="send-button rounded" />
-      </div>
-      <br />
-      <div>
-        <p>Already have an account? <router-link to="/">Sign In!</router-link></p>
+      <div id="hidden-container">
+        <input
+          type="text"
+          placeholder="name"
+          class="sign-up-input"
+          autocomplete="off"
+          v-model="name"
+        />
+        <br />
+        <input
+          type="email"
+          placeholder="email"
+          class="sign-up-input"
+          autocomplete="off"
+          v-model="email"
+        />
+        <br />
+        <input
+          type="password"
+          placeholder="password"
+          class="sign-up-input"
+          autocomplete="off"
+          v-model="password"
+        />
+        <div class="send-container">
+          <button class="send-button rounded" v-on:click="register()">
+            Submit
+          </button>
+        </div>
+        <br />
+        <div>
+          <p>
+            Already have an account? <router-link to="/">Sign In!</router-link>
+          </p>
+        </div>
       </div>
     </div>
   </div>
@@ -36,11 +46,57 @@
 <script>
 export default {
   name: "Register",
+  data: function () {
+    return {
+      name: "",
+      email: "",
+      password: "",
+    };
+  },
+  methods: {
+    async register() {
+      var hc = document.getElementById('hidden-container');
+      var spinner = document.getElementById('loader');
+      hc.style.display = "none";
+      spinner.style.display = "block";
+      const response = await fetch("http://localhost:3000/register", {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: this.name,
+          email: this.email,
+          password: this.password,
+        }),
+      });
+
+      if (response.status != 200) {
+        hc.style.display = "block";
+        spinner.style.display = "none";
+        return this.$store.dispatch("showN", {
+          message: "Error",
+          status: "error",
+        });
+      }
+
+      this.$store.dispatch("showN", {
+        message: "Registered",
+        status: "success",
+      });
+
+      this.$router.push("/");
+    },
+  },
 };
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+#loader {
+  display: none;
+}
 .form-container {
   padding: 50px;
 }

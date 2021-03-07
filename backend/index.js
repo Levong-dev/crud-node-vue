@@ -17,7 +17,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
-// Routes
+// Routes 
 app.get('/ping', (req, res, next) => {
     return res.send('pong');
 })
@@ -37,7 +37,6 @@ app.get('/verifyToken', async (req, res, next) => {
                 .status(406)
                 .send({ message: 'Token expired' })
         }
-
         return res.sendStatus(200)
     })
 })
